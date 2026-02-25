@@ -51,7 +51,7 @@ struct Endpoint {
   bool multi_qp_ = false;
 
   int inComingCount = 0;
-  int kStartDepth = 128;
+  int kStartDepth = 4096;
   int kRxDepth = 256;
   int kReplyDepth = kRxDepth;
   WRContext *rx_ctx;
@@ -188,11 +188,13 @@ struct Endpoint {
     attr.cap.max_recv_wr = kRxDepth;
     attr.cap.max_send_sge = kSGEntry;
     attr.cap.max_recv_sge = kSGEntry;
-    attr.cap.max_inline_data = 256;
+    // attr.cap.max_inline_data = 256;
+    attr.cap.max_inline_data = 128;
     attr.qp_type = IBV_QPT_RC;
     attr.sq_sig_all = 0;
     PS_CHECK_EQ(rdma_create_qp(id, pd, &attr), 0)
         << "Create RDMA queue pair failed: " << strerror(errno);
+    
     id->pd = pd;
 
     PS_LOG(TRACE) << "qp created: pd=" << pd << " , cq=" << cq
@@ -367,17 +369,26 @@ class RDMATransport : public Transport {
     wr.wr.rdma.remote_addr = remote_addr;
     wr.wr.rdma.rkey = rkey;
 
-    if (inline_write) {
-      wr.send_flags |= IBV_SEND_INLINE;
-    }
-
+    //if (inline_write) {
+      //wr.send_flags |= IBV_SEND_INLINE;
+    //}
+    // 增加详细的错误信息输出，包括错误码和描述
     if (prev_wr == nullptr) {
       PS_CHECK_EQ(ibv_post_send(endpoint_->cm_ids[0]->qp, &wr, &bad_wr), 0)
           << "ibv_post_send failed.";
     } else {
       prev_wr->next = &wr;
-      PS_CHECK_EQ(ibv_post_send(endpoint_->cm_ids[0]->qp, prev_wr, &bad_wr), 0)
-          << "ibv_post_send failed.";
+      // PS_CHECK_EQ(ibv_post_send(endpoint_->cm_ids[0]->qp, prev_wr, &bad_wr), 0)
+      //    << "ibv_post_send failed.";
+      int ret = ibv_post_send(endpoint_->cm_ids[0]->qp, prev_wr, &bad_wr);
+
+      if (ret != 0) {
+        // 3. 尝试获取出错的 Work Request ID (如果有的话)
+        uint64_t failed_wr_id = (bad_wr != nullptr) ? bad_wr->wr_id : 0;
+        LOG(FATAL) << "ibv_post_send failed! "
+               << "Error code: " << ret << " (" << strerror(ret) << "). "
+               << "Failed wr_id: " << failed_wr_id;
+     } 
     }
   }
 

@@ -21,7 +21,12 @@ __global__ void wait_flag_kernel(int64_t* flag, int64_t* seq) {
     int64_t flag_value = flag_ptr[0];
     int64_t seq_value = seq_ptr[0];
     while (flag_value < seq_value) {
-      __nanosleep(128);
+      // __nanosleep(128);
+#if defined(__HIP_PLATFORM_AMD__)
+    __builtin_amdgcn_s_sleep(2); 
+#else
+    __nanosleep(128);
+#endif
       flag_value = flag_ptr[0];
     }
   }
