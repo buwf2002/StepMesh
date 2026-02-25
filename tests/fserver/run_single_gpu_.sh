@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 # common setup
 export BIN=${BIN:-test_fserver}
-export DMLC_INTERFACE=${RNIC:-ib0}
+export DMLC_INTERFACE=${RNIC:-eno1}
 export SCHEDULER_IP=$(ip -o -4 addr | grep ${RNIC} | awk '{print $4}' | cut -d'/' -f1)
 #export SCHEDULER_IP=$(ifconfig ${RNIC} | grep 'inet ' | awk '{print $2}')
 
@@ -19,7 +19,7 @@ export DMLC_NUM_WORKER=1
 export DMLC_NUM_SERVER=1
 export DMLC_PS_ROOT_URI=$SCHEDULER_IP  # scheduler's RDMA interface IP 
 export DMLC_PS_ROOT_PORT=8123     # scheduler's port (can random choose)
-export DMLC_ENABLE_RDMA=ibverbs
+export DMLC_ENABLE_RDMA=zmq
 # export DMLC_ENABLE_RDMA=zmq
 # export DMLC_INTERFACE=auto
 # export STEPMESH_BIND_CPU_CORE=1

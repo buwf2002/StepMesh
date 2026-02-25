@@ -143,6 +143,10 @@ inline void StartPS(int customer_id, Node::Role role, int rank, bool do_barrier,
   Backend::Register("GPU", new GpuBackend());
 #endif
 
+#ifdef DMLC_USE_HIP
+  Backend::Register("DCU", new DcuBackend());
+#endif
+
   // scheduler do not need to attach to gpu
   if (role != Node::SCHEDULER) {
     int gpu = 0;

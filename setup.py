@@ -44,6 +44,7 @@ if __name__ == "__main__":
 
     torch_cxx11_abi = torch.compiled_with_cxx11_abi()
     use_cuda = os.environ.get("USE_CUDA",'1')=='1'
+    use_hip = os.environ.get("USE_HIP",'1')=='1'
     extra_link = ['-lrdmacm', '-libverbs']
     extra_compile_args={
             'cxx': [
@@ -66,6 +67,21 @@ if __name__ == "__main__":
                 '--use_fast_math', f'-D_GLIBCXX_USE_CXX11_ABI={str(int(torch_cxx11_abi))}'] + cc_flag
         bare_metal_major, bare_metal_minor = \
             _get_cuda_bare_metal_version(cpp_extension.CUDA_HOME)
+    if use_hip:
+        # 链接 DCU 的 HIP 运行时库
+        extra_link += ['-lamdhip64'] 
+        # 基础编译参数
+        extra_compile_args['cxx'] += [
+            '-DDMLC_USE_HIP',
+            '-D__HIP_PLATFORM_HCC__',
+            f'-D_GLIBCXX_USE_CXX11_ABI={str(int(torch_cxx11_abi))}'
+        ]
+        
+        # HIPCC 编译参数（跳过 NVIDIA 的 arch/gencode 参数）
+        extra_compile_args['hipcc'] = [
+            '-O3', 
+            '--use_fast_math'
+        ] + cc_flag
 
     setup(
         name='FServer',

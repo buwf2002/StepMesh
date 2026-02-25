@@ -9,6 +9,13 @@
 #include <ATen/cuda/CUDAContext.h>
 #include <ATen/cuda/CUDAEvent.h>
 #endif
+
+#ifdef DMLC_USE_HIP
+#include <ATen/hip/HIPContext.h>
+#include <ATen/hip/HIPEvent.h>
+#include <hip/hip_runtime.h>
+#endif
+
 #include <torch/torch.h>
 
 #include <memory>

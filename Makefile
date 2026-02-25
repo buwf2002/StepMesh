@@ -37,6 +37,14 @@ CFLAGS += -DDMLC_USE_CUDA
 INCPATH += -I$(CUDA_HOME)/include
 endif
 
+ifeq ($(USE_HIP), 1)
+HIP_PATH ?= /opt/dtk/hip
+LIBS += -lhip_hcc -L$(HIP_PATH)/lib
+CFLAGS += -DDMLC_USE_HIP -D__HIP_PLATFORM_HCC__
+INCPATH += -I$(HIP_PATH)/include
+export CXX = hipcc
+endif
+
 ifeq ($(USE_RDMA), 1)
 LIBS += -lrdmacm -libverbs
 CFLAGS += -DDMLC_USE_RDMA
@@ -102,8 +110,15 @@ build/%.o: src/%.cc ${ZMQ}
 
 test: $(TEST)
 
+CMAKE_OPTS := -DPython_EXECUTABLE=$(shell which python3)
+
+ifeq ($(USE_HIP), 1)
+    CMAKE_OPTS += -DCMAKE_CXX_COMPILER=hipcc -DUSE_ROCM=ON -D__HIP_PLATFORM_HCC__=ON
+else
+    CMAKE_OPTS += -DCMAKE_CUDA_COMPILER=$(CMAKE_CUDA_COMPILER) -DCUDA_TOOLKIT_ROOT_DIR=$(CUDA_TOOLKIT_ROOT_DIR)
+endif
+
 af:
 	@mkdir -p cmake_build
-	@cd cmake_build; cmake .. -DCMAKE_CUDA_COMPILER=$(CMAKE_CUDA_COMPILER) -DPython_EXECUTABLE=$(shell which python3) -DCUDA_TOOLKIT_ROOT_DIR=$(CUDA_TOOLKIT_ROOT_DIR); make -j
+	@cd cmake_build; cmake .. $(CMAKE_OPTS); make -j
 	@mkdir -p build
-
