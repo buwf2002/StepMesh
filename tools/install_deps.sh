@@ -1,11 +1,11 @@
-sudo apt-get update
-sudo apt install -y build-essential libtool autoconf automake libnuma-dev unzip pkg-config librdmacm-dev rdma-core make cmake python3-pip
+#apt update
+#apt install -y build-essential libtool autoconf automake libnuma-dev unzip pkg-config librdmacm-dev rdma-core make cmake python3-pip
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../ &> /dev/null && pwd )"
 
-rm -rf zeromq-4.1.4.tar.gz zeromq-4.1.4
+#rm -rf zeromq-4.1.4.tar.gz zeromq-4.1.4
 
-wget https://raw.githubusercontent.com/mli/deps/master/build/zeromq-4.1.4.tar.gz
+#wget https://raw.githubusercontent.com/mli/deps/master/build/zeromq-4.1.4.tar.gz
 tar --no-same-owner -zxf zeromq-4.1.4.tar.gz
 pushd zeromq-4.1.4 || exit
 export CFLAGS=-fPIC

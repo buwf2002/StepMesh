@@ -10,7 +10,7 @@ trap cleanup EXIT
 
 export BIN=${BIN:-test_fserver}
 # common setup
-export DMLC_INTERFACE=${RNIC:-brainpf_bond0}
+export DMLC_INTERFACE=${RNIC:-ib0}
 export SCHEDULER_IP=$(ip -o -4 addr | grep ${DMLC_INTERFACE} | awk '{print $4}' | cut -d'/' -f1)
 export DMLC_NUM_WORKER=${NUM_WORKER:-1}
 export DMLC_NUM_SERVER=${NUM_SERVER:-1}
@@ -23,7 +23,7 @@ export NCCL_DEBUG=warning
 export STEPMESH_SPLIT_QP_LAG=1
 export STEPMESH_BIND_CPU_CORE=1
 
-# export PS_VERBOSE=2
+#export PS_VERBOSE=2
 
 ROLE=${ROLE:-server}
 if [ $ROLE == "server" ]; then
@@ -33,14 +33,14 @@ if [ $ROLE == "server" ]; then
 
   sleep 1 # wait scheduler
 
-  export DMLC_INTERFACE=auto
+  #export DMLC_INTERFACE=auto
   for P in {0..7}; do
     DMLC_ROLE=server STEPMESH_GPU=${P} python3 $THIS_DIR/${BIN}.py $@ &
   done
 elif [ $ROLE == "worker" ]; then
   echo "Run worker with scheduler ip: $1"
   export DMLC_PS_ROOT_URI=$1
-  export DMLC_INTERFACE=auto
+  #export DMLC_INTERFACE=auto
   export DMLC_NODE_HOST=${SCHEDULER_IP}
   for P in {0..7}; do
     DMLC_ROLE=worker STEPMESH_GPU=${P} python3 $THIS_DIR/${BIN}.py "${@:2}" &
@@ -48,7 +48,7 @@ elif [ $ROLE == "worker" ]; then
 elif [ $ROLE == "server-slave" ]; then
   echo "Run server with scheduler ip: $1"
   export DMLC_PS_ROOT_URI=$1
-  export DMLC_INTERFACE=auto
+  #export DMLC_INTERFACE=auto
   export DMLC_NODE_HOST=${SCHEDULER_IP}
   for P in {0..7}; do
     DMLC_ROLE=server STEPMESH_GPU=${P} python3 $THIS_DIR/${BIN}.py "${@:2}" &
@@ -59,7 +59,7 @@ elif [ $ROLE == "joint" ]; then
   export DMLC_PS_ROOT_URI=$SCHEDULER_IP
   DMLC_ROLE=scheduler python3 $THIS_DIR/${BIN}.py &
 
-  export DMLC_INTERFACE=auto
+  #export DMLC_INTERFACE=auto
   for P in {0..7}; do
     DMLC_ROLE=server STEPMESH_GPU=${P} python3 $THIS_DIR/${BIN}.py &
   done

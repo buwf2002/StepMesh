@@ -44,13 +44,13 @@ To debug, set `PS_VERBOSE=1` to see important logs during connection setup, and 
 ```bash
 export STEPMESH_BAKCEND=DCU
 # ROLE: jointly run scheduler, worker and server; RNIC: your first rdma nic; 
-ROLE=joint RNIC=brainpf_bond0 bash tests/fserver/run_single_gpu.sh
+ROLE=joint RNIC=ib0 bash tests/fserver/run_single_gpu.sh
 ```
 - Multiple GPU Example: Suppose you want to run with 8 workers and 8 servers on different GPUs of the same server.
 ```bash
 export STEPMESH_BAKCEND=DCU
 # ROLE: jointly run scheduler, worker and server; RNIC: your first rdma nic; 
-ROLE=joint RNIC=brainpf_bond0 bash tests/fserver/run_multi_gpu.sh
+ROLE=joint RNIC=ib0 bash tests/fserver/run_multi_gpu.sh
 ```
 
 ### 2. Two-Node Example
@@ -58,7 +58,7 @@ ROLE=joint RNIC=brainpf_bond0 bash tests/fserver/run_multi_gpu.sh
 ```bash
 export STEPMESH_BAKCEND=DCU
 # server: RNIC: your first rdma nic; 
-ROLE=server RNIC=brainpf_bond0 bash tests/fserver/run_multi_gpu.sh
+ROLE=server RNIC=ib0 bash tests/fserver/run_multi_gpu.sh
 # the first line will print scheduler ip used for worker
 ```
 
@@ -66,7 +66,7 @@ ROLE=server RNIC=brainpf_bond0 bash tests/fserver/run_multi_gpu.sh
 ```bash
 export STEPMESH_BAKCEND=DCU
 # worker: RNIC: your first rdma nic; 
-ROLE=worker RNIC=brainpf_bond0 bash tests/fserver/run_multi_gpu.sh ${scheduler ip}
+ROLE=worker RNIC=ib0 bash tests/fserver/run_multi_gpu.sh ${scheduler ip}
 ```
 
 For more test cases and examples, please refer to [tests](./tests).
