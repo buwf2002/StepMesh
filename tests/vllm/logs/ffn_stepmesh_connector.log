@@ -1,0 +1,44 @@
+INFO 03-11 17:27:41 [__init__.py:217] Automatically detected platform rocm.
+Failed to get NUMA node ID, No module named 'pynvml' 0
+Traceback (most recent call last):
+  File "/workspace/StepMesh/tests/vllm/ffn.py", line 45, in <module>
+    parallel_config = ParallelConfig(
+  File "/usr/local/lib/python3.10/dist-packages/pydantic/_internal/_dataclasses.py", line 121, in __init__
+    s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)
+  File "/workspace/my_vllm_source/vllm/config/parallel.py", line 500, in _verify_args
+    from vllm.executor.executor_base import ExecutorBase
+  File "/workspace/my_vllm_source/vllm/executor/executor_base.py", line 15, in <module>
+    from vllm.distributed.kv_transfer.kv_connector.utils import KVOutputAggregator
+  File "/workspace/my_vllm_source/vllm/distributed/kv_transfer/kv_connector/utils.py", line 14, in <module>
+    from vllm import _custom_ops as ops
+  File "/workspace/my_vllm_source/vllm/_custom_ops.py", line 17, in <module>
+    from lmslim import quant_ops
+  File "/usr/local/lib/python3.10/dist-packages/lmslim/__init__.py", line 7, in <module>
+    from lmslim.quantize import quant_ops,awq_triton,quant_tools
+  File "/usr/local/lib/python3.10/dist-packages/lmslim/quantize/quant_ops.py", line 18, in <module>
+    from lightop.op import rms_norm_dynamic_per_token_quant
+  File "/usr/local/lib/python3.10/dist-packages/lightop/__init__.py", line 5, in <module>
+    from torch.utils.cpp_extension import ROCM_HOME
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/cpp_extension.py", line 23, in <module>
+    from .hipify import hipify_python
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/hipify/hipify_python.py", line 272, in <module>
+    RE_KERNEL_LAUNCH = re.compile(r'([ ]+)(detail?)::[ ]+\\\n[ ]+')
+  File "/usr/lib/python3.10/re.py", line 251, in compile
+    return _compile(pattern, flags)
+  File "/usr/lib/python3.10/re.py", line 303, in _compile
+    p = sre_compile.compile(pattern, flags)
+  File "/usr/lib/python3.10/sre_compile.py", line 788, in compile
+    p = sre_parse.parse(p, flags)
+  File "/usr/lib/python3.10/sre_parse.py", line 955, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+  File "/usr/lib/python3.10/sre_parse.py", line 444, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+  File "/usr/lib/python3.10/sre_parse.py", line 841, in _parse
+    p = _parse_sub(source, state, sub_verbose, nested + 1)
+  File "/usr/lib/python3.10/sre_parse.py", line 444, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+  File "/usr/lib/python3.10/sre_parse.py", line 668, in _parse
+    if not item or item[0][0] is AT:
+  File "/usr/lib/python3.10/sre_parse.py", line 165, in __getitem__
+    def __getitem__(self, index):
+KeyboardInterrupt

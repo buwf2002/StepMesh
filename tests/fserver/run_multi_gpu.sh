@@ -55,6 +55,7 @@ elif [ $ROLE == "server-slave" ]; then
   done
 elif [ $ROLE == "joint" ]; then
   echo "Run scheduler, server, and worker jointly"
+
   export DMLC_NODE_HOST=${SCHEDULER_IP}
   export DMLC_PS_ROOT_URI=$SCHEDULER_IP
   DMLC_ROLE=scheduler numactl -m 0 python3 $THIS_DIR/${BIN}.py &

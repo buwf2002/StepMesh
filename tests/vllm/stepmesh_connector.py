@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 logger = init_logger(__name__)
 
 
-DEBUG = True #(os.environ.get('STEPMESH_CONNECTOR_DEBUG', 'false').lower() == 'true')
+DEBUG = False #(os.environ.get('STEPMESH_CONNECTOR_DEBUG', 'false').lower() == 'true')
 class StepMeshAFDConnector(AFDConnectorBase):
     """StepMesh-based implementation of AFD connector.
 
@@ -50,7 +50,8 @@ class StepMeshAFDConnector(AFDConnectorBase):
         self.rank = rank
         self.local_rank = local_rank
         self.server_rank = self.afd_config.afd_server_rank
-        self.num_recv_times = self.afd_config.num_ffn_servers if self.afd_config.afd_role == "attention" else self.afd_config.num_attention_servers
+        self.num_recv_times = self.afd_config.num_ffn_servers \
+            if self.afd_config.afd_role == "attention" else self.afd_config.num_attention_servers
         parallel_config = config.parallel_config
         self.world_size = parallel_config.tensor_parallel_size * parallel_config.pipeline_parallel_size * parallel_config.data_parallel_size
         self._initialized = False
@@ -107,7 +108,7 @@ class StepMeshAFDConnector(AFDConnectorBase):
         os.environ['DMLC_NUM_SERVER'] = str(self.afd_config.num_ffn_servers)
 
         os.environ['DMLC_ENABLE_RDMA'] = os.environ.get('DMLC_ENABLE_RDMA', "0")  # set 1 for bond
-        os.environ['DMLC_INTERFACE'] = 'auto'
+        os.environ['DMLC_INTERFACE'] = os.environ.get('DMLC_INTERFACE', "ibp1s0")
         os.environ['STEPMESH_SPLIT_QP_LAG'] = os.environ.get('STEPMESH_SPLIT_QP_LAG', "0")  # set 1 for bond
         os.environ['STEPMESH_BIND_CPU_CORE'] = '1'
 
@@ -123,7 +124,7 @@ class StepMeshAFDConnector(AFDConnectorBase):
 
         os.environ['PS_VERBOSE']= os.environ.get('PS_VERBOSE', '2')
 
-        logger.info(
+        print(
             f"StepMesh environment setup: role={os.environ.get('DMLC_ROLE')}, "
             f"num_worker={os.environ.get('DMLC_NUM_WORKER')}, "
             f"num_server={os.environ.get('DMLC_NUM_SERVER')}, "
@@ -140,16 +141,16 @@ class StepMeshAFDConnector(AFDConnectorBase):
         when the current process is in FFN role.
         """
         try:
-            logger.info("Starting scheduler subprocess for FFN role")
+            print("Starting scheduler subprocess for FFN role")
             # Use subprocess.Popen to start scheduler as a separate process
             self.scheduler_process = subprocess.Popen([
                 'python', '-c',
                 'import torch; import fserver_lib as ps; import os; '
                 'os.environ["DMLC_ROLE"] = "scheduler"; '
-                'os.environ["DMLC_INTERFACE"] = "brainpf_bond0"; '
+                'os.environ["DMLC_INTERFACE"] = "ibp1s0"; '
                 'ps.init(); ps.stop()'
             ], env=os.environ.copy())
-            logger.info(f"Scheduler subprocess started with PID: {self.scheduler_process.pid}")
+            print(f"Scheduler subprocess started with PID: {self.scheduler_process.pid}")
         except Exception as e:
             logger.error(f"Failed to start scheduler subprocess: {e}")
             raise RuntimeError(f"Failed to start scheduler subprocess: {e}") from e
@@ -157,17 +158,18 @@ class StepMeshAFDConnector(AFDConnectorBase):
     def init_afd_connector(self) -> None:
         """Initialize StepMesh connector."""
         if self._initialized:
+            print("Initialize StepMesh connector")
             return
         try:
-            logger.info(f"+++++Start init ps. {self.rank}")
+            print(f"+++++Start init ps. {self.rank}")
             ps.init()
-            logger.info(f"----Finish init ps. {self.rank}")
+            print(f"----Finish init ps. {self.rank}")
 
             # self.signal = ps.SimpleNotify()
             # self.signal.init() # type: ignore
 
             self._initialized = True
-            logger.info(
+            print(
                 f"StepMesh connector initialized successfully as {os.environ.get('DMLC_ROLE')}"
             )
 

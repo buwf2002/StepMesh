@@ -43,7 +43,7 @@ afd_config = AFDConfig(
     afd_server_rank=node_rank,
 )
 parallel_config = ParallelConfig(
-    tensor_parallel_size=1,
+    tensor_parallel_size=2,
     pipeline_parallel_size=1,
     data_parallel_size=1,
 )
@@ -56,13 +56,15 @@ connector = StepMeshAFDConnector(
     local_rank=local_rank,
     config=vllm_config
 )
-torch.cuda.set_device(local_rank)
+
+worker_gpu = int(os.environ.get('DMLC_GROUP_SIZE', 0))
+torch.cuda.set_device(local_rank + worker_gpu)
 time.sleep(5)
 connector.init_afd_connector()
 # set_numa_affinity(local_rank)
 import fserver_lib as ps
-ret_buffer = torch.rand([65535, 7168], dtype=torch.bfloat16, device='cuda')
-
+ret_buffer = torch.rand([65535, 7168], dtype=torch.bfloat16, device=f'cuda:{local_rank + worker_gpu}')
+print(ret_buffer.device)
 
 s = torch.cuda.Stream()
 

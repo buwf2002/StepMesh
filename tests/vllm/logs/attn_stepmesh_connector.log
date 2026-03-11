@@ -1,0 +1,10 @@
+INFO 03-11 17:24:42 [__init__.py:217] Automatically detected platform rocm.
+[17:24:52] worker 0 /workspace/StepMesh/src/postoffice.cc:75: Creating Van: zmq. group_size=2
+[17:24:52] worker 0 /workspace/StepMesh/src/./zmq_van.h:66: BYTEPS_ZMQ_MAX_SOCKET set to 1024
+[17:24:52] worker 0 /workspace/StepMesh/src/./zmq_van.h:71: BYTEPS_ZMQ_NTHREADS set to 4
+[17:24:52] worker 0 /workspace/StepMesh/src/van.cc:562:  interface and ip from env: ibp1s0 (11.8.3.63)
+[17:24:52] [worker 0 /workspace/StepMesh/src/van.cc:601: Bind to [role=worker, ip=11.8.3.63, port=47735, is_recovery=0, aux_id=-1, num_ports=1]
+[17:24:52] worker 0 /workspace/StepMesh/src/./zmq_van.h:159: Zmq connecting to node 17:24:52] worker[role=scheduler, id=1, ip=11.8.3.63, port=1239, is_recovery=0, aux_id=-1, num_ports=1]. My node is  [role=worker, ip=11.8.3.63, port=47735, is_recovery=0, aux_id=-1, num_ports=1]
+0 /workspace/StepMesh/src/./zmq_van.h:352: Start ZMQ recv thread
+[17:24:52] worker 0 /workspace/StepMesh/src/van.cc:701: zeromq 32767	sent: ? => 1. Meta: request=0, timestamp=0, control={ cmd=ADD_NODE, node={ [role=worker, ip=11.8.3.63, port=47735, is_recovery=0, aux_id=0, num_ports=1] } }. NOT DATA MSG!, Slave QP Count: 0
+BindToCpuCore: gpu 0 -> cpu 17

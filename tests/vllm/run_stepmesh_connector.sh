@@ -1,55 +1,71 @@
 #!/bin/bash
-# run_demo_zmq.sh (Physical Isolation Fixed)
+# run_stepmesh_connector.sh - Test between ffn.py and attn.py
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 function cleanup() {
     echo "kill all testing process of ps lite for user $USER"
-    # pkill -9 -f test_bench
     pkill -9 -f test_remote_moe
     pkill -9 -f test_fserver
+    pkill -f -9 "VLLM*"
+    pkill -f -9 python3
+    pkill -9 -f python
+    pkill -9 -f vllm
+    pkill -9 -f fserver
+    pkill -9 -f ffn.py
+    pkill -9 -f attn.py
     sleep 1
 }
+
+cleanup
+
 trap cleanup EXIT
 
-pkill -f -9 "VLLM*"
-pkill -f -9 python3
-pkill -9 -f python
-pkill -9 -f vllm
-pkill -9 -f fserver
+export STEPMESH_BAKCEND=DCU
+# export PYTHONPATH=/workspace/my_vllm_source:$PYTHONPATH
 
-export DMLC_INTERFACE="ibp1s0"
+export DMLC_INTERFACE=${RNIC:-ibp1s0}
 export SCHEDULER_IP=$(ip -o -4 addr | grep ${DMLC_INTERFACE} | awk '{print $4}' | cut -d'/' -f1)
-
-export DMLC_NUM_WORKER=1
-export DMLC_NUM_SERVER=1
-export DMLC_PS_ROOT_URI=$SCHEDULER_IP  # scheduler's RDMA interface IP 
-export DMLC_PS_ROOT_PORT=8123     # scheduler's port (can random choose)
+export DMLC_NUM_WORKER=${NUM_WORKER:-1}
+export DMLC_NUM_SERVER=${NUM_SERVER:-1}
+export DMLC_GROUP_SIZE=2
+export DMLC_NODE_RANK=${NODE_RANK:-0}
+export DMLC_PS_ROOT_PORT=8123
+export DMLC_PS_ROOT_URI=$SCHEDULER_IP
 export DMLC_ENABLE_RDMA=zmq
-export DMLC_USE_RDMA=1
-
-export DMLC_NODE_HOST=${SCHEDULER_IP}
-# export DMLC_INTERFACE=auto
+export NCCL_DEBUG=warning
 export STEPMESH_SPLIT_QP_LAG=0
-export STEPMESH_BIND_CPU_CORE=0
-export STEPMESH_GPU=0
+export STEPMESH_BIND_CPU_CORE=1
+
 export PS_VERBOSE=2
 
-export DMLC_RANK=0
+# Ensure logs directory exists
+mkdir -p logs
 
+echo "Starting ffn.py (server) instance..."
+
+# Start ffn.py (server role)
 export STEPMESH_CPU_START_OFFSET=10
+DMLC_ROLE=server  numactl -m 0 torchrun --master_port=29500 --nproc_per_node=2 ffn.py > logs/ffn.log 2>&1 &
+FFN_PID=$!
+echo "Started ffn.py (PID: $FFN_PID)"
 
-echo ">>> [1/2] Starting FFN Server on PHYSICAL GPU 0"
+# Wait for ffn.py to initialize
+echo "Waiting 15 seconds for ffn.py to initialize..."
+sleep 10
 
-CUDA_VISIBLE_DEVICES=0,1 HIP_VISIBLE_DEVICES=0,1 \
-DMLC_ROLE=server nohup numactl -m 0 python3 ffn.py > logs/ffn_stepmesh_connector.log 2>&1 &
+echo "Starting attn.py (worker) instance..."
 
-echo "FFN PID: $!"
-echo "Sleep 15s"
-sleep 15s
+# Start attn.py (worker role)
+export STEPMESH_CPU_START_OFFSET=15
 
-export DMLC_ROLE=worker
-export DMLC_RANK=0
+DMLC_ROLE=worker numactl -m 0 torchrun --master_port=29501 --nproc_per_node=2 attn.py > logs/attn.log 2>&1
 
-echo ">>> [1/2] Starting Attn Server on PHYSICAL GPU 0"
+ATTN_PID=$!
+echo "Started attn.py (PID: $ATTN_PID)"
 
-CUDA_VISIBLE_DEVICES=2,3 HIP_VISIBLE_DEVICES=2,3 \
-DMLC_ROLE=worker python3 attn.py 2>&1 | tee logs/attn_stepmesh_connector.log
+echo "All processes started. Waiting..."
+echo "Logs: logs/ffn.log, logs/attn.log"
+echo "Press Ctrl+C to stop"
+
+# Wait for all background processes
+wait

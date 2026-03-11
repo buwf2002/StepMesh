@@ -11,7 +11,7 @@ import torch.profiler
 
 
 os.environ['STEPMESH_BIND_CPU_CORE']='1'
-os.environ['STEPMESH_CONNECTOR_DEBUG']='true'
+os.environ['STEPMESH_CONNECTOR_DEBUG']='false'
 os.environ['STEPMESH_SPLIT_QP_LAG']='0'
 
 ip=os.environ.get("DMLC_PS_ROOT_URI", "127.0.0.1")
@@ -32,7 +32,7 @@ afd_config = AFDConfig(
 parallel_config = ParallelConfig(
     tensor_parallel_size=1,
     pipeline_parallel_size=1,
-    data_parallel_size=1,
+    data_parallel_size=2,
 )
 vllm_config = VllmConfig(
     afd_config=afd_config,
