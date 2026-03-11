@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 # common setup
 export BIN=${BIN:-test_fserver}
-export DMLC_INTERFACE=${RNIC:-eno1}
+export DMLC_INTERFACE=${RNIC:-ibp1s0}
 export SCHEDULER_IP=$(ip -o -4 addr | grep ${RNIC} | awk '{print $4}' | cut -d'/' -f1)
 #export SCHEDULER_IP=$(ifconfig ${RNIC} | grep 'inet ' | awk '{print $2}')
 

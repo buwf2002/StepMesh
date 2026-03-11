@@ -1,5 +1,5 @@
 import os
-from vllm.config import AFDConfig, VllmConfig,ParallelConfig
+from vllm.config import VllmConfig,ParallelConfig,AFDConfig
 from stepmesh_connector import StepMeshAFDConnector
 import torch
 import torch.profiler
@@ -7,12 +7,11 @@ import time
 from bind_pid import set_numa_affinity, bind_pid
 from cycle import get_cycles_per_ms
 from stepmesh_connector import StepMeshAFDConnector,AFDConnectorMetadata
-
 import numpy as np
 
 os.environ['STEPMESH_BIND_CPU_CORE']='1'
 os.environ['STEPMESH_CONNECTOR_DEBUG']='true'
-os.environ['STEPMESH_SPLIT_QP_LAG']='1'
+os.environ['STEPMESH_SPLIT_QP_LAG']='0'
 
 '''
 export STEPMESH_BIND_CPU_CORE=1
@@ -21,7 +20,7 @@ export STEPMESH_SPLIT_QP_LAG=1
 export VLLM_TORCH_PROFILER_DIR=prof
 '''
 
-ip="10.203.8.15"
+ip=os.environ.get("DMLC_PS_ROOT_URI", "127.0.0.1")
 
 cycle_per_ms = get_cycles_per_ms()
 
@@ -44,7 +43,7 @@ afd_config = AFDConfig(
     afd_server_rank=node_rank,
 )
 parallel_config = ParallelConfig(
-    tensor_parallel_size=8,
+    tensor_parallel_size=1,
     pipeline_parallel_size=1,
     data_parallel_size=1,
 )

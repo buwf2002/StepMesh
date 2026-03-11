@@ -23,8 +23,10 @@ if is_worker:
         [i for i in range(len(pull_tensors))]
     )
     f.wait(handler)
-    #assert torch.allclose(sum(push_tensors), pull_tensors[0])
-    print("worker test done")
+    # print(sum(push_tensors))
+    # print(pull_tensors)
+    # assert torch.allclose(sum(push_tensors), pull_tensors[0])
+    print(f"{gpu} worker test done")
 
 elif is_server:
     gpu = os.environ.get('STEPMESH_GPU')

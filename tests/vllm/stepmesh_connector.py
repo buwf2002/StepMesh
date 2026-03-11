@@ -13,8 +13,8 @@ import fserver_lib as ps
 
 from vllm.logger import init_logger
 
-from vllm.distributed.afd_transfer.afd_connector.base import AFDConnectorBase
-from vllm.distributed.afd_transfer.afd_connector.metadata import AFDConnectorMetadata
+from afd_connector.base import AFDConnectorBase
+from afd_connector.metadata import AFDConnectorMetadata
 import numpy as np
 
 import time
@@ -62,8 +62,8 @@ class StepMeshAFDConnector(AFDConnectorBase):
         self._current_comm_handles = None
         self._current_metadata = None
 
-        self.signal = ps.SimpleNotify()
-        self.signal.init()
+        # self.signal = ps.SimpleNotify()
+        # self.signal.init()
 
         if DEBUG:
             self.stepmesh_costs = []
@@ -106,7 +106,7 @@ class StepMeshAFDConnector(AFDConnectorBase):
         os.environ['DMLC_NUM_WORKER'] = str(self.afd_config.num_attention_servers)
         os.environ['DMLC_NUM_SERVER'] = str(self.afd_config.num_ffn_servers)
 
-        os.environ['DMLC_ENABLE_RDMA'] = 'ibverbs'
+        os.environ['DMLC_ENABLE_RDMA'] = os.environ.get('DMLC_ENABLE_RDMA', "0")  # set 1 for bond
         os.environ['DMLC_INTERFACE'] = 'auto'
         os.environ['STEPMESH_SPLIT_QP_LAG'] = os.environ.get('STEPMESH_SPLIT_QP_LAG', "0")  # set 1 for bond
         os.environ['STEPMESH_BIND_CPU_CORE'] = '1'

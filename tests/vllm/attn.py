@@ -12,9 +12,9 @@ import torch.profiler
 
 os.environ['STEPMESH_BIND_CPU_CORE']='1'
 os.environ['STEPMESH_CONNECTOR_DEBUG']='true'
-os.environ['STEPMESH_SPLIT_QP_LAG']='1'
+os.environ['STEPMESH_SPLIT_QP_LAG']='0'
 
-ip="10.203.8.15"
+ip=os.environ.get("DMLC_PS_ROOT_URI", "127.0.0.1")
 
 cycle_per_ms = get_cycles_per_ms()
 
@@ -32,7 +32,7 @@ afd_config = AFDConfig(
 parallel_config = ParallelConfig(
     tensor_parallel_size=1,
     pipeline_parallel_size=1,
-    data_parallel_size=8,
+    data_parallel_size=1,
 )
 vllm_config = VllmConfig(
     afd_config=afd_config,
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     s = torch.cuda.Stream()
     torch.cuda.set_stream(s)
     profiler = None
-    hidden_states = [torch.randn(4, 7168, dtype=torch.bfloat16, device="cuda")   for i in range(afd_config.num_afd_stages)]
+    hidden_states = [torch.randn(4, 7168, dtype=torch.bfloat16, device="cuda") for i in range(afd_config.num_afd_stages)]
     while True:
         if counter % (1830*2) == 0:
             connector.print_trace()

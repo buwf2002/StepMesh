@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 # common setup
 export BIN=${BIN:-test_fserver}
-export DMLC_INTERFACE=${RNIC:-ib0}
+export DMLC_INTERFACE=${RNIC:-ibp1s0}
 export SCHEDULER_IP=$(ip -o -4 addr | grep ${RNIC} | awk '{print $4}' | cut -d'/' -f1)
 #export SCHEDULER_IP=$(ifconfig ${RNIC} | grep 'inet ' | awk '{print $2}')
 
@@ -29,7 +29,7 @@ export DMLC_NODE_HOST=${SCHEDULER_IP}
 export STEPMESH_SPLIT_QP_LAG=0
 export STEPMESH_BIND_CPU_CORE=0
 export STEPMESH_GPU=0
-export PS_VERBOSE=0
+export PS_VERBOSE=2
 
 DMLC_ROLE=scheduler numactl -m 0 python3 $THIS_DIR/$BIN.py &
 export STEPMESH_CPU_START_OFFSET=10
