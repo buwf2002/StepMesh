@@ -18,12 +18,13 @@ export DMLC_GROUP_SIZE=2 #这是每个worker或者serve有多少个process
 export DMLC_NODE_RANK=${NODE_RANK:-0}
 export DMLC_PS_ROOT_PORT=8123
 export DMLC_PS_ROOT_URI=$SCHEDULER_IP  # scheduler's RDMA interface IP
-export DMLC_ENABLE_RDMA=zmq
+# export DMLC_ENABLE_RDMA=zmq
+export DMLC_ENABLE_RDMA=ibverbs
 export NCCL_DEBUG=warning
 export STEPMESH_SPLIT_QP_LAG=0
 export STEPMESH_BIND_CPU_CORE=1
 
-export PS_VERBOSE=0
+export PS_VERBOSE=2
 
 ROLE=${ROLE:-server}
 if [ $ROLE == "server" ]; then

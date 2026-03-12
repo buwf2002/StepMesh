@@ -64,7 +64,7 @@ connector.init_afd_connector()
 # set_numa_affinity(local_rank)
 import fserver_lib as ps
 ret_buffer = torch.rand([65535, 7168], dtype=torch.bfloat16, device=f'cuda:{local_rank + worker_gpu}')
-print(ret_buffer.device)
+print(f" FFN Rank {local_rank} using Device {ret_buffer.device}")
 
 s = torch.cuda.Stream()
 

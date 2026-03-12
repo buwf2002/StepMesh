@@ -21,7 +21,7 @@ cleanup
 trap cleanup EXIT
 
 export STEPMESH_BAKCEND=DCU
-# export PYTHONPATH=/workspace/my_vllm_source:$PYTHONPATH
+export PYTHONPATH=/workspace/my_vllm_source:$PYTHONPATH
 
 export DMLC_INTERFACE=${RNIC:-ibp1s0}
 export SCHEDULER_IP=$(ip -o -4 addr | grep ${DMLC_INTERFACE} | awk '{print $4}' | cut -d'/' -f1)
@@ -31,12 +31,12 @@ export DMLC_GROUP_SIZE=2
 export DMLC_NODE_RANK=${NODE_RANK:-0}
 export DMLC_PS_ROOT_PORT=8123
 export DMLC_PS_ROOT_URI=$SCHEDULER_IP
-export DMLC_ENABLE_RDMA=zmq
+export DMLC_ENABLE_RDMA=ibverbs #ibverbs
 export NCCL_DEBUG=warning
 export STEPMESH_SPLIT_QP_LAG=0
 export STEPMESH_BIND_CPU_CORE=1
 
-export PS_VERBOSE=2
+export PS_VERBOSE=0
 
 # Ensure logs directory exists
 mkdir -p logs
