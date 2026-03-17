@@ -585,7 +585,7 @@ class AFTensorServer {
     return ev;
   }
 
-  /*KeyTensor FromBlob(const KVMeta& req_meta, const KVPairs<char>& req_data) {
+  KeyTensor FromBlob(const KVMeta& req_meta, const KVPairs<char>& req_data) {
     KeyTensor key_tensor;
     if (req_meta.push) {
       auto options = torch::TensorOptions()
@@ -597,39 +597,8 @@ class AFTensorServer {
     }
     key_tensor.key = req_data.keys[0];
     return key_tensor;
-  }*/
-
-  KeyTensor FromBlob(const KVMeta& req_meta, const KVPairs<char>& req_data) {
-    KeyTensor key_tensor;
-    if (req_meta.push) {
-        void* raw_ptr = (void*)req_data.vals.data();
-        at::Device target_device = Backend::Get()->GetDevice();
-
-        hipPointerAttribute_t attr;
-        hipError_t err = hipPointerGetAttributes(&attr, raw_ptr);
-
-        // 判断是否为 GPU 指针 (海光 DCU 上 memoryType 2 为 Device)
-        bool is_on_gpu = (err == hipSuccess && attr.memoryType == 2);
-
-        if (is_on_gpu) {
-            auto options = torch::TensorOptions()
-                             .dtype(at::ScalarType(req_meta.dtype))
-                             .device(at::kCUDA, attr.device); // 使用指针实际所在的设备 ID
-
-            key_tensor.val = at::from_blob(raw_ptr, req_meta.shape, options);
-        } else {
-            auto cpu_options = torch::TensorOptions()
-                                 .dtype(at::ScalarType(req_meta.dtype))
-                                 .device(at::kCPU);
-
-            auto cpu_tensor = at::from_blob(raw_ptr, req_meta.shape, cpu_options);
-
-            key_tensor.val = cpu_tensor.to(target_device).clone();
-        }
-    }
-    key_tensor.key = req_data.keys[0];
-    return key_tensor;
   }
+
 
   void ResponseWorker() {
     BindCpuCore(1, 1);

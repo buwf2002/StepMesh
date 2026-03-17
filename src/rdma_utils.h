@@ -181,11 +181,11 @@ class BackendMemoryAllocator {
 
     void *ptr = Backend::Get()->Alloc(requested_size);
 
-    /*cudaError_t cuda_err = cudaMalloc(&ptr, requested_size);
-    if (cuda_err != cudaSuccess) {
-      PS_LOG(FATAL) << "cudaMalloc failed for GPU " << associated_gpu_id_
-                 << " size " << requested_size << " for key " << key << ": "
-                 << cudaGetErrorString(cuda_err);
+    /*hipError_t hip_err = hipMalloc(&ptr, requested_size);
+    if (hip_err != hipSuccess) {
+        PS_LOG(FATAL) << "hipMalloc failed for GPU " << associated_gpu_id_
+                      << " size " << requested_size << " for key " << key << ": "
+                      << hipGetErrorString(hip_err);
     }*/
 
     struct ibv_mr *mr =

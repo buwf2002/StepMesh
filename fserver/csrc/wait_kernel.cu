@@ -23,7 +23,7 @@ __global__ void wait_flag_kernel(int64_t* flag, int64_t* seq) {
     while (flag_value < seq_value) {
       // __nanosleep(128);
 #if defined(__HIP_PLATFORM_AMD__)
-    __builtin_amdgcn_s_sleep(2); 
+    __builtin_amdgcn_s_sleep(128); 
 #else
     __nanosleep(128);
 #endif

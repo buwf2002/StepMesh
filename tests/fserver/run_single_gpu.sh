@@ -27,10 +27,9 @@ export DMLC_ENABLE_RDMA=ibverbs
 export DMLC_NODE_HOST=${SCHEDULER_IP}
 # export DMLC_INTERFACE=auto
 export STEPMESH_SPLIT_QP_LAG=0
-export STEPMESH_BIND_CPU_CORE=0
+export STEPMESH_BIND_CPU_CORE=1
 export STEPMESH_GPU=0
-export PS_VERBOSE=2
-
+export PS_VERBOSE=0
 DMLC_ROLE=scheduler numactl -m 0 python3 $THIS_DIR/$BIN.py &
 export STEPMESH_CPU_START_OFFSET=10
 DMLC_ROLE=server numactl -m 0 python3 $THIS_DIR/$BIN.py $@ &
